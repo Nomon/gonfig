@@ -1,7 +1,6 @@
 language: go
 go:
   - 1.2
-  - tip
 
 install:
   - go get -v ./...
@@ -10,8 +9,7 @@ install:
   - go get -v code.google.com/p/go.tools/cmd/cover
   - go install -v github.com/onsi/ginkgo/ginkgo
 
-after_script:
-  - go get -v code.google.com/p/go.tools/cmd/cover
+after_success:
   - go get -v code.google.com/p/go.tools/cmd/cover
   - go get -v github.com/axw/gocov/gocov
   - go get -v github.com/mattn/goveralls
