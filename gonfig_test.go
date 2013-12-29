@@ -7,7 +7,7 @@ import (
 )
 
 var _ = Describe("Gonfig", func() {
-	Describe("Config", func() {
+	Describe("Config struct", func() {
 		var cfg *Config
 		BeforeEach(func() {
 			cfg = NewConfig()

@@ -66,7 +66,7 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 // Gets the key from first store that it is found from
 func (self *Config) Get(key string) interface{} {
 	for _, config := range self.configs {
-		if value := config.Get(variable); value != nil {
+		if value := config.Get(key); value != nil {
 			return value
 		}
 	}
@@ -74,12 +74,12 @@ func (self *Config) Get(key string) interface{} {
 }
 
 // Sets variable to all configurations except Defaults
-func (self *Config) Set(variable string, value interface{}) {
+func (self *Config) Set(key string, value interface{}) {
 	for name, config := range self.configs {
 		if name == "defaults" {
 			continue
 		}
-		config.Set(variable, value)
+		config.Set(key, value)
 	}
 }
 
