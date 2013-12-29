@@ -1,6 +1,6 @@
 # Gonfig
 
-Gonfig is a simple chaining gonfig manager for Go lang
+Gonfig is a simple hierarchial config manager for Go lang
 
 ### Usage
 

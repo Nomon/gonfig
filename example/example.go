@@ -31,7 +31,7 @@ func main() {
 	// .Defaults() is shorthand for .Use("defaults")
 	log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
 	// /dome/configured/path
-	log.Println("Default PATH in conf", conf.Use("env").Get("PATH"))
+	log.Println("Default PATH in env conf", conf.Use("env").Get("PATH"))
 
 	conf.Set("PATH", "/new/path")
 	// the new changed path
@@ -39,5 +39,4 @@ func main() {
 	// /dome/configured/path
 	// .Set on root configuration wont override Defaults
 	log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
-
 }
