@@ -10,7 +10,7 @@ install:
   - go get -v code.google.com/p/go.tools/cmd/cover
   - go install -v github.com/onsi/ginkgo/ginkgo
 
-after_success:
+after_script:
   - go get -v code.google.com/p/go.tools/cmd/cover
   - go get -v code.google.com/p/go.tools/cmd/cover
   - go get -v github.com/axw/gocov/gocov
