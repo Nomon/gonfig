@@ -51,3 +51,7 @@ func (self *MemoryConfig) Load() error {
 	}
 	return nil
 }
+
+func (self *MemoryConfig) Save() error {
+	return nil
+}

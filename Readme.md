@@ -2,6 +2,21 @@
 
 Gonfig is a simple hierarchial config manager for Go lang
 
+### Api
+
+All the config types including the root implement the Configurable interface:
+
+```go
+type Configurable interface {
+  Get(string) interface{}
+  Set(string, interface{})
+  All() map[string]interface{}
+  Reset(...map[string]interface{})
+  Load() error
+  Save() error
+}
+```
+
 ### Usage
 
 ```go
@@ -38,7 +53,7 @@ func main() {
   // .Defaults() is shorthand for .Use("defaults")
   log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
   // /dome/configured/path
-  log.Println("Default PATH in conf", conf.Use("env").Get("PATH"))
+  log.Println("Default PATH in env conf", conf.Use("env").Get("PATH"))
 
   conf.Set("PATH", "/new/path")
   // the new changed path
@@ -46,7 +61,39 @@ func main() {
   // /dome/configured/path
   // .Set on root configuration wont override Defaults
   log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
+
+  conf.Use("json").Set("abcd", "1234")
+  if err := conf.Use("json").Save(); err != nil {
+    log.Println(err)
+    return
+  }
+  // reset config and reload from disk
+  conf.Use("json").Reset()
+  conf.Use("json").Load()
+  // 1234
+  log.Println("abcd from loaded json config", conf.Use("json").Get("abcd"))
 }
 
 ```
 
+Or Directly:
+
+```go
+func main() {
+  conf := NewMomoryConfig();
+  conf.Set("asd", "1234")
+  log.Println("asd:", conf.Get("asd"))
+  jsonconf := NewJsonConfig("./config.json");
+  if err := jsonconf.Load(); err != nil {
+    log.Println("Error loading conf", err)
+    return
+  }
+  jsonconf.Set("asd", "1234")
+  log.Println("asd:", jsonconf.Get("asd"))
+  if err := jsonconf.Save(); err != nil {
+    log.Println("config failed to save",err)
+    return
+  }
+  log.Println("asd:1234 saved to config.json")
+}
+```

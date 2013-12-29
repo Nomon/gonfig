@@ -35,6 +35,7 @@ var _ = Describe("JsonConfig", func() {
 			cfg.Set("QQ", 123)
 			Expect(cfg.Get("QQ")).To(Equal(123))
 		})
+
 		It("should error", func() {
 			Expect(err).To(HaveOccurred())
 		})

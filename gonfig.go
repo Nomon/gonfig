@@ -23,6 +23,7 @@ type Configurable interface {
 	All() map[string]interface{}
 	Reset(...map[string]interface{})
 	Load() error
+	Save() error
 }
 
 // Creates a new config that is by default only memory backed
@@ -95,6 +96,18 @@ func (self *Config) Load() error {
 	}
 	for _, config := range self.configs {
 		if err := config.Load(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (self *Config) Save() error {
+	if self.Defaults() == nil {
+		self.Defaults(NewMemoryConfig())
+	}
+	for _, config := range self.configs {
+		if err := config.Save(); err != nil {
 			return err
 		}
 	}

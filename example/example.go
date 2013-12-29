@@ -39,4 +39,15 @@ func main() {
 	// /dome/configured/path
 	// .Set on root configuration wont override Defaults
 	log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
+
+	conf.Use("json").Set("abcd", "1234")
+	if err := conf.Use("json").Save(); err != nil {
+		log.Println(err)
+		return
+	}
+	// reset config and reload from disk
+	conf.Use("json").Reset()
+	conf.Use("json").Load()
+	// 1234
+	log.Println("abcd from loaded json config", conf.Use("json").Get("abcd"))
 }

@@ -29,3 +29,19 @@ func (self *jsonConfig) Load() (err error) {
 	self.data = out
 	return nil
 }
+
+func (self *jsonConfig) Save() (err error) {
+	if self.data == nil {
+		self.initialize()
+	}
+	b, err := json.Marshal(self.data)
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(self.path, b, 0600); err != nil {
+		return err
+	}
+
+	return nil
+}
