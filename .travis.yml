@@ -9,4 +9,11 @@ install:
   - go get -v github.com/onsi/gomega
   - go install -v github.com/onsi/ginkgo/ginkgo
 
+after_success:
+  - go get code.google.com/p/go.tools/cmd/cover
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
+  - export PATH=$PATH:$HOME/gopath/bin/
+  - goveralls nBDcRxYTbtu6tjcj8fknzcZOgSkxb9VnL
+
 script: PATH=$HOME/gopath/bin:$PATH ginkgo -r  -i --randomizeAllSpecs --failOnPending --skipMeasurements --cover
