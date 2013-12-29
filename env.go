@@ -6,12 +6,12 @@ import (
 )
 
 type envConfig struct {
-	*MemoryConfig
+	*memoryConfig
 	prefix string
 }
 
 func NewEnvConfig(prefix string) Configurable {
-	cfg := &envConfig{&MemoryConfig{}, prefix}
+	cfg := &envConfig{&memoryConfig{}, prefix}
 	cfg.Load()
 	return cfg
 }

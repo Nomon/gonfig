@@ -2,6 +2,9 @@
 
 Gonfig is a simple hierarchial config manager for Go lang
 
+[![Build Status](https://travis-ci.org/Nomon/gonfig.png?branch=master)](https://travis-ci.org/Nomon/gonfig)
+[![Coverage Status](https://coveralls.io/repos/Nomon/gonfig/badge.png?branch=HEAD)](https://coveralls.io/r/Nomon/gonfig?branch=HEAD)
+
 ### Api
 
 All the config types including the root implement the Configurable interface:

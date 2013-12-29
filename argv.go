@@ -6,12 +6,12 @@ import (
 )
 
 type argvConfig struct {
-	*MemoryConfig
+	*memoryConfig
 	prefix string
 }
 
 func NewArgvConfig(prefix string) Configurable {
-	cfg := &argvConfig{&MemoryConfig{}, prefix}
+	cfg := &argvConfig{&memoryConfig{}, prefix}
 	cfg.Load()
 	return cfg
 }

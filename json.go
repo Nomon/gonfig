@@ -6,12 +6,12 @@ import (
 )
 
 type jsonConfig struct {
-	*MemoryConfig
+	*memoryConfig
 	path string
 }
 
 func NewJsonConfig(path string) Configurable {
-	cfg := &jsonConfig{&MemoryConfig{}, path}
+	cfg := &jsonConfig{&memoryConfig{}, path}
 	cfg.Load()
 	return cfg
 }
