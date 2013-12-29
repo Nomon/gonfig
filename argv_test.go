@@ -17,5 +17,8 @@ var _ = Describe("ArgvConfig", func() {
 	})
 	It("Should load variables from commandline", func() {
 		Expect(len(cfg.All()) > 0).To(BeTrue())
+		cfg2 := NewArgvConfig("")
+		cfg2.Load()
+		Expect(len(cfg2.All()) >= len(cfg.All())).To(BeTrue())
 	})
 })

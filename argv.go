@@ -19,7 +19,7 @@ func NewArgvConfig(prefix string) Configurable {
 func (self *argvConfig) Get(key string) interface{} {
 	var f *flag.Flag
 	if self.prefix != "" {
-		f = flag.Lookup(self.prefix + "." + key)
+		f = flag.Lookup(self.prefix + key)
 	} else {
 		f = flag.Lookup(key)
 	}
@@ -37,7 +37,7 @@ func (self *argvConfig) All() map[string]interface{} {
 	flag.VisitAll(func(f *flag.Flag) {
 		name := f.Name
 		if self.prefix != "" && strings.HasPrefix(f.Name, self.prefix) {
-			name = strings.Replace(name, self.prefix+".", "", 1)
+			name = strings.Replace(name, self.prefix, "", 1)
 		}
 		if getter, ok := f.Value.(flag.Getter); ok {
 			data[name] = getter.Get()

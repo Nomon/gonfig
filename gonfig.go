@@ -1,18 +1,5 @@
 package gonfig
 
-import (
-	"fmt"
-)
-
-func trace(s string) string {
-	fmt.Println("entering:", s)
-	return s
-}
-
-func un(s string) {
-	fmt.Println("leaving:", s)
-}
-
 type Config struct {
 	configs map[string]Configurable
 }
