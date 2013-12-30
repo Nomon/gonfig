@@ -52,7 +52,9 @@ type struct Config {
 
 ```
 
-### Usage
+### Usage & Examples
+
+For more examples check out the [example_test.go](https://github.com/Nomon/gonfig/blob/master/example_test.go)
 
 ```go
 package main
