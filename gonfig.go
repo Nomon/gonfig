@@ -1,5 +1,6 @@
 package gonfig
 
+// The hierarchial Config that can be used to mount other configs that are searched for keys by Get
 type Config struct {
 	configs map[string]Configurable
 }
@@ -133,11 +134,23 @@ func (self *Config) Save() error {
 }
 
 // Returns a map of data from all Configurables in use
+// the first found instance of variable found is provided
+// so:
+// cfg.Use("a", NewMemoryConfig())
+// cfg.Use("b", NewMemoryConfig())
+// cfg.Use("a").Set("a","1")
+// cfg.Set("b").Set("a","2")
+// then:
+// cfg.All()["a"] == "1"
+// cfg.Get("a") == "1"
+// cfg.Use("b".).Get("a") == "2"
 func (self *Config) All() map[string]interface{} {
 	values := make(map[string]interface{}, 10)
 	for _, config := range self.configs {
 		for key, value := range config.All() {
-			values[key] = value
+			if values[key] == nil {
+				values[key] = value
+			}
 		}
 	}
 	return values
