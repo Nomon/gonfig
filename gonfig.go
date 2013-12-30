@@ -134,8 +134,7 @@ func (self *Config) Save() error {
 }
 
 // Returns a map of data from all Configurables in use
-// the first found instance of variable found is provided
-// so:
+// the first found instance of variable found is provided.
 // cfg.Use("a", NewMemoryConfig())
 // cfg.Use("b", NewMemoryConfig())
 // cfg.Use("a").Set("a","1")
