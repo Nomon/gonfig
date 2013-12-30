@@ -10,6 +10,9 @@ Gonfig is a simple hierarchial config manager for Go lang
 All the config types including the root implement the Configurable interface:
 
 ```go
+// The main Configurable interface
+// All the single source configurations (NewJsonConfig, NewFileConfig, NewArgvConfig, NewEnvConfig, NewUrlConfig) implement it
+// Also the hierarcial configuration (Config) implements it.
 type Configurable interface {
   // Get a configuration variable from config
   Get(string) interface{}
