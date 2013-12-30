@@ -89,10 +89,17 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 
 // Gets the key from first store that it is found from
 func (self *Config) Get(key string) interface{} {
+	defaults := self.Defaults()
 	for _, config := range self.configs {
+		if config == defaults {
+			continue
+		}
 		if value := config.Get(key); value != nil {
 			return value
 		}
+	}
+	if value := defaults.Get(key); value != nil {
+		return value
 	}
 	return nil
 }
@@ -109,9 +116,6 @@ func (self *Config) Set(key string, value interface{}) {
 
 // calls Load on all Configurables in Use
 func (self *Config) Load() error {
-	if self.Defaults() == nil {
-		self.Defaults(NewMemoryConfig())
-	}
 	for _, config := range self.configs {
 		if err := config.Load(); err != nil {
 			return err
