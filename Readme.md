@@ -11,13 +11,42 @@ All the config types including the root implement the Configurable interface:
 
 ```go
 type Configurable interface {
+  // Get a configuration variable from config
   Get(string) interface{}
+  // Set a variable
   Set(string, interface{})
+  // Return a map of all variables
   All() map[string]interface{}
+  // Reset the config data to passed data, if nothing is given set it to zero value
   Reset(...map[string]interface{})
+  // Loads the config, ie. from disk/url
   Load() error
+  // Save the config. To file or Post to url.
   Save() error
 }
+
+
+// Config struct
+type struct Config {
+  // Returns the Defaults() memory configration
+  // This configuration is used if variable is not found in the hierarchy
+  // Defaults can be set to a configration:
+  //  conf.Defaults().Reset(map[string]interface{} (
+  //    "key": "value",
+  //  ))
+  Defaults()
+
+  // Mounts a new configuration in the hierarchy
+  // conf.Use("global", NewUrlConfig("http://host.com/config.json"))
+  // conf.Use("local", NewFileConfig("./config.json"))
+  // err := conf.Load();
+  // then get variable from specific config
+  // conf.Use("global").Get("key")
+  // or traverse the hierarchy and search for "key"
+  // conf.Get("key") 
+  Use(string name, c ...Configurable)
+}
+
 ```
 
 ### Usage

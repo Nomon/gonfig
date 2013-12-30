@@ -17,13 +17,15 @@ func NewJsonConfig(path string) Configurable {
 }
 
 func (self *jsonConfig) Load() (err error) {
-	self.initialize()
+	if self.data == nil {
+		self.initialize()
+	}
 	var data []byte = make([]byte, 1024)
 	if data, err = ioutil.ReadFile(self.path); err != nil {
 		return err
 	}
-	out := make(map[string]interface{})
-	if err := json.Unmarshal(data, &out); err != nil {
+	out, err := self.unmarshal(data)
+	if err != nil {
 		return err
 	}
 	self.data = out

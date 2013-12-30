@@ -1,5 +1,9 @@
 package gonfig
 
+import (
+	"encoding/json"
+)
+
 type memoryConfig struct {
 	data map[string]interface{}
 }
@@ -12,9 +16,20 @@ func NewMemoryConfig() Configurable {
 	return cfg
 }
 
+// private methods
+func (self *memoryConfig) unmarshal(bytes []byte) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	if err := json.Unmarshal(bytes, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (self *memoryConfig) initialize() {
 	self.data = make(map[string]interface{}, 10)
 }
+
+//public methods
 
 func (self *memoryConfig) Reset(datas ...map[string]interface{}) {
 	if len(datas) == 0 {
