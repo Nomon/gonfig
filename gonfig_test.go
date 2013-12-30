@@ -76,5 +76,14 @@ var _ = Describe("Gonfig", func() {
 			}
 			Expect(i == 3).To(BeTrue())
 		})
+		It("Should be able to use Config objects in the hierarchy", func() {
+			cfg.Use("test", NewConfig())
+			cfg.Set("test_123", "321test")
+			Expect(cfg.Use("test").Get("test_123")).To(Equal("321test"))
+			cfg.Use("memory").Set("test_123", "asd")
+			Expect(cfg.Use("test").Get("test_123")).To(Equal("321test"))
+			Expect(cfg.Use("memory").Get("test_123")).To(Equal("asd"))
+			Expect(cfg.Get("test_123")).To(Equal("asd"))
+		})
 	})
 })
