@@ -1,3 +1,4 @@
+// package gonfig provides tools for managing hierarcial configuration from multiple sources
 package gonfig
 
 // The hierarchial Config that can be used to mount other configs that are searched for keys by Get
@@ -34,9 +35,9 @@ func NewConfig() *Config {
 	return cfg
 }
 
-// Returns the Defaults configuration that is used if no other config contains the desired key
-// Returns the Defaults() memory configration
-// This configuration is used if variable is not found in the hierarchy
+// Returns the Defaults configuration that is used if no other config contains the desired key.
+// Returns the Defaults() memory configration.
+// This configuration is used if variable is not found in the hierarchy.
 // Defaults can be set to a configration:
 //  conf.Defaults().Reset(map[string]interface{} (
 //    "key": "value",
@@ -49,7 +50,7 @@ func (self *Config) Defaults(config ...Configurable) Configurable {
 }
 
 // Resets all configs with the provided data, if no data is provided empties all stores
-// Never touches the Defaults, to reset Defaults use config.Defaults().Reset()
+// Never touches the Defaults, to reset Defaults use Config.Defaults().Reset()
 func (self *Config) Reset(datas ...map[string]interface{}) {
 	var data map[string]interface{}
 	var store Configurable
@@ -70,14 +71,14 @@ func (self *Config) Reset(datas ...map[string]interface{}) {
 }
 
 // Use config as named config and return an already set and loaded config
-// mounts a new configuration in the hierarchy
-// conf.Use("global", NewUrlConfig("http://host.com/config.json"))
+// mounts a new configuration in the hierarchy.
+// conf.Use("global", NewUrlConfig("http://host.com/config..json")).
 // conf.Use("local", NewFileConfig("./config.json"))
-// err := conf.Load();
-// then get variable from specific config
-// conf.Use("global").Get("key")
-// or traverse the hierarchy and search for "key"
-// conf.Get("key")
+// err := conf.Load();.
+// Then get variable from specific config.
+// conf.Use("global").Get("key").
+// or traverse the hierarchy and search for "key".
+// conf.Get("key").
 func (self *Config) Use(name string, config ...Configurable) Configurable {
 	if len(config) == 0 {
 		return self.configs[name]
@@ -87,7 +88,7 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 	return self.configs[name]
 }
 
-// Gets the key from first store that it is found from
+// Gets the key from first store that it is found from, Config.Defaults() used as fallback
 func (self *Config) Get(key string) interface{} {
 	defaults := self.Defaults()
 	for _, config := range self.configs {
@@ -104,7 +105,7 @@ func (self *Config) Get(key string) interface{} {
 	return nil
 }
 
-// Sets variable to all configurations except Defaults
+// Sets variable to all configurations except Config.Defaults()
 func (self *Config) Set(key string, value interface{}) {
 	for name, config := range self.configs {
 		if name == "defaults" {
@@ -114,7 +115,7 @@ func (self *Config) Set(key string, value interface{}) {
 	}
 }
 
-// calls Load on all Configurables in Use
+// calls Configurable.Load() on all Configurable objects in the hierarchy.
 func (self *Config) Load() error {
 	for _, config := range self.configs {
 		if err := config.Load(); err != nil {
@@ -139,14 +140,14 @@ func (self *Config) Save() error {
 
 // Returns a map of data from all Configurables in use
 // the first found instance of variable found is provided.
-// cfg.Use("a", NewMemoryConfig())
-// cfg.Use("b", NewMemoryConfig())
-// cfg.Use("a").Set("a","1")
-// cfg.Set("b").Set("a","2")
-// then:
-// cfg.All()["a"] == "1"
-// cfg.Get("a") == "1"
-// cfg.Use("b".).Get("a") == "2"
+// Config.Use("a", NewMemoryConfig()).
+// Config.Use("b", NewMemoryConfig()).
+// Config.Use("a").Set("a","1").
+// Config.Set("b").Set("a","2").
+// then.
+// Config.All()["a"] == "1".
+// Config.Get("a") == "1".
+// Config.Use("b".).Get("a") == "2".
 func (self *Config) All() map[string]interface{} {
 	values := make(map[string]interface{}, 10)
 	for _, config := range self.configs {
