@@ -1,6 +1,6 @@
 # Gonfig
 
-Gonfig is a simple hierarchial config manager for Go lang
+Gonfig is a simple hierarchial config manager for Go lang. Inspired by [nconf](https://github.com/flatiron/nconf).
 
 [![Build Status](https://travis-ci.org/Nomon/gonfig.png?branch=master)](https://travis-ci.org/Nomon/gonfig)
 [![Coverage Status](https://coveralls.io/repos/Nomon/gonfig/badge.png?branch=HEAD)](https://coveralls.io/r/Nomon/gonfig?branch=HEAD)
