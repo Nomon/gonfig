@@ -2,7 +2,7 @@ package gonfig_test
 
 import (
 	"fmt"
-	. "github.com/nomon/gonfig"
+	. "github.com/Nomon/gonfig"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
