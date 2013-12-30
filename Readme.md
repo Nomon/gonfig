@@ -6,7 +6,7 @@ Gonfig is a simple hierarchial config manager for Go lang. Inspired by [nconf](h
 [![Coverage Status](https://coveralls.io/repos/Nomon/gonfig/badge.png?branch=HEAD)](https://coveralls.io/r/Nomon/gonfig?branch=HEAD)
 ## Docs
 
-vailable via: [![Codebot](https://codebot.io/badge/github.com/Nomon/gonfig.png)](http://codebot.io/doc/pkg/github.com/Nomon/gonfig "Codebot")
+Available via: [![Codebot](https://codebot.io/badge/github.com/Nomon/gonfig.png)](http://codebot.io/doc/pkg/github.com/Nomon/gonfig "Codebot")
 
 ### Api
 
