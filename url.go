@@ -10,6 +10,7 @@ type urlConfig struct {
 	url string
 }
 
+// Returns a new Configurable backed by JSON at url
 func NewUrlConfig(url string) *urlConfig {
 	return &urlConfig{&memoryConfig{}, url}
 }

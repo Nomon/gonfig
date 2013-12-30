@@ -36,5 +36,4 @@ func TestGonfig(t *testing.T) {
 	os.Remove("./config_test_1.json")
 	os.Remove("./config_test_2.json")
 	os.Remove("./config.json")
-
 }

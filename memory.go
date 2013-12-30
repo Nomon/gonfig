@@ -8,6 +8,8 @@ type memoryConfig struct {
 	data map[string]interface{}
 }
 
+// Returns a new memory backed Configurable
+// The most basic Configurable simply backed by a map[string]interface{}
 func NewMemoryConfig() Configurable {
 	cfg := &memoryConfig{
 		data: make(map[string]interface{}, 10),

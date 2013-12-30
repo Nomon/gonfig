@@ -3,6 +3,7 @@ package gonfig_test
 import (
 	"fmt"
 	. "github.com/Nomon/gonfig"
+	"os"
 )
 
 func ExampleHierarchy() {
@@ -23,4 +24,21 @@ func ExampleDefaults() {
 	conf.Use("second").Set("test_default", 333)
 	fmt.Println(conf.Get("test_default"), conf.Get("test_default_b"))
 	// Output: 333 321
+}
+
+func ExampleSaveToJson() {
+	conf := NewConfig()
+	conf.Set("some", "variable")
+	jsonconf := NewJsonConfig("./config.json")
+	jsonconf.Reset(conf.All())
+	if err := jsonconf.Save(); err != nil {
+		fmt.Println("Error saving config", err)
+	}
+	jsonconf2 := NewJsonConfig("./config.json")
+	if err := jsonconf2.Load(); err != nil {
+		fmt.Println("Error loading config", err)
+	}
+	fmt.Println(jsonconf2.Get("some"))
+	os.Remove("./config.json")
+	// Output: variable
 }

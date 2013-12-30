@@ -10,6 +10,8 @@ type jsonConfig struct {
 	path string
 }
 
+// Returns a new Configurable backed by a json file at path.
+// The file does not need to exist, if it does not exist the first Save call will create it.
 func NewJsonConfig(path string) Configurable {
 	cfg := &jsonConfig{&memoryConfig{}, path}
 	cfg.Load()
