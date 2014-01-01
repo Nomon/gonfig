@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-type argvConfig struct {
-	*memoryConfig
+type ArgvConfig struct {
+	*MemoryConfig
 	prefix string
 }
 
 func NewArgvConfig(prefix string) Configurable {
-	cfg := &argvConfig{&memoryConfig{}, prefix}
+	cfg := &ArgvConfig{&MemoryConfig{}, prefix}
 	cfg.Load()
 	return cfg
 }
 
-func (self *argvConfig) Get(key string) interface{} {
+func (self *ArgvConfig) Get(key string) interface{} {
 	var f *flag.Flag
 	if self.prefix != "" {
 		f = flag.Lookup(self.prefix + key)
@@ -32,7 +32,7 @@ func (self *argvConfig) Get(key string) interface{} {
 	return nil
 }
 
-func (self *argvConfig) All() map[string]interface{} {
+func (self *ArgvConfig) All() map[string]interface{} {
 	data := make(map[string]interface{})
 	flag.VisitAll(func(f *flag.Flag) {
 		name := f.Name
@@ -46,7 +46,7 @@ func (self *argvConfig) All() map[string]interface{} {
 	return data
 }
 
-func (self *argvConfig) Load() (err error) {
+func (self *ArgvConfig) Load() (err error) {
 	self.initialize()
 	return nil
 }

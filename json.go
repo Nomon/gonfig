@@ -5,20 +5,20 @@ import (
 	"io/ioutil"
 )
 
-type jsonConfig struct {
-	*memoryConfig
+type JsonConfig struct {
+	*MemoryConfig
 	path string
 }
 
 // Returns a new Configurable backed by a json file at path.
 // The file does not need to exist, if it does not exist the first Save call will create it.
 func NewJsonConfig(path string) Configurable {
-	cfg := &jsonConfig{&memoryConfig{}, path}
+	cfg := &JsonConfig{&MemoryConfig{}, path}
 	cfg.Load()
 	return cfg
 }
 
-func (self *jsonConfig) Load() (err error) {
+func (self *JsonConfig) Load() (err error) {
 	if self.data == nil {
 		self.initialize()
 	}
@@ -34,7 +34,7 @@ func (self *jsonConfig) Load() (err error) {
 	return nil
 }
 
-func (self *jsonConfig) Save() (err error) {
+func (self *JsonConfig) Save() (err error) {
 	if self.data == nil {
 		self.initialize()
 	}

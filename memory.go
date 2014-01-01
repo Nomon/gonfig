@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 )
 
-type memoryConfig struct {
+type MemoryConfig struct {
 	data map[string]interface{}
 }
 
 // Returns a new memory backed Configurable
 // The most basic Configurable simply backed by a map[string]interface{}
 func NewMemoryConfig() Configurable {
-	cfg := &memoryConfig{
+	cfg := &MemoryConfig{
 		data: make(map[string]interface{}, 10),
 	}
 	cfg.Load()
@@ -19,7 +19,7 @@ func NewMemoryConfig() Configurable {
 }
 
 // private methods
-func (self *memoryConfig) unmarshal(bytes []byte) (map[string]interface{}, error) {
+func (self *MemoryConfig) unmarshal(bytes []byte) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
 	if err := json.Unmarshal(bytes, &out); err != nil {
 		return nil, err
@@ -27,13 +27,13 @@ func (self *memoryConfig) unmarshal(bytes []byte) (map[string]interface{}, error
 	return out, nil
 }
 
-func (self *memoryConfig) initialize() {
+func (self *MemoryConfig) initialize() {
 	self.data = make(map[string]interface{}, 10)
 }
 
 //public methods
 
-func (self *memoryConfig) Reset(datas ...map[string]interface{}) {
+func (self *MemoryConfig) Reset(datas ...map[string]interface{}) {
 	if len(datas) == 0 {
 		self.initialize()
 		return
@@ -41,34 +41,34 @@ func (self *memoryConfig) Reset(datas ...map[string]interface{}) {
 	self.data = datas[0]
 }
 
-func (self *memoryConfig) Get(key string) interface{} {
+func (self *MemoryConfig) Get(key string) interface{} {
 	if self.data == nil {
 		self.initialize()
 	}
 	return self.data[key]
 }
 
-func (self *memoryConfig) All() map[string]interface{} {
+func (self *MemoryConfig) All() map[string]interface{} {
 	if self.data == nil {
 		self.initialize()
 	}
 	return self.data
 }
 
-func (self *memoryConfig) Set(key string, value interface{}) {
+func (self *MemoryConfig) Set(key string, value interface{}) {
 	if self.data == nil {
 		self.initialize()
 	}
 	self.data[key] = value
 }
 
-func (self *memoryConfig) Load() error {
+func (self *MemoryConfig) Load() error {
 	if self.data == nil {
 		self.initialize()
 	}
 	return nil
 }
 
-func (self *memoryConfig) Save() error {
+func (self *MemoryConfig) Save() error {
 	return nil
 }

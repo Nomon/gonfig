@@ -5,17 +5,17 @@ import (
 	"net/http"
 )
 
-type urlConfig struct {
-	*memoryConfig
+type UrlConfig struct {
+	*MemoryConfig
 	url string
 }
 
 // Returns a new Configurable backed by JSON at url
-func NewUrlConfig(url string) *urlConfig {
-	return &urlConfig{&memoryConfig{}, url}
+func NewUrlConfig(url string) *UrlConfig {
+	return &UrlConfig{&MemoryConfig{}, url}
 }
 
-func (self *urlConfig) Load() error {
+func (self *UrlConfig) Load() error {
 	if self.data == nil {
 		self.initialize()
 	}

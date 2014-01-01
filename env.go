@@ -5,25 +5,25 @@ import (
 	"strings"
 )
 
-type envConfig struct {
-	*memoryConfig
+type EnvConfig struct {
+	*MemoryConfig
 	prefix string
 }
 
 func NewEnvConfig(prefix string) Configurable {
-	cfg := &envConfig{&memoryConfig{}, prefix}
+	cfg := &EnvConfig{&MemoryConfig{}, prefix}
 	cfg.Load()
 	return cfg
 }
 
-func (self *envConfig) Get(key string) interface{} {
+func (self *EnvConfig) Get(key string) interface{} {
 	if self.data == nil {
 		self.initialize()
 	}
 	return self.data[self.prefix+key]
 }
 
-func (self *envConfig) Load() (err error) {
+func (self *EnvConfig) Load() (err error) {
 	self.initialize()
 	env := os.Environ()
 	for _, pair := range env {
