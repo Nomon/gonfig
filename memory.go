@@ -1,6 +1,7 @@
 package gonfig
 
 // MemoryConfig is a simple abstraction to map[]interface{} for in process memory backed configuration
+// only implements Configurable use JsonConfig to save/load if needed
 type MemoryConfig struct {
 	data map[string]interface{}
 }
@@ -27,6 +28,7 @@ func (self *MemoryConfig) Reset(datas ...map[string]interface{}) {
 	return
 }
 
+// Get key from map
 func (self *MemoryConfig) Get(key string) interface{} {
 	if self.data == nil {
 		self.init()
@@ -34,6 +36,7 @@ func (self *MemoryConfig) Get(key string) interface{} {
 	return self.data[key]
 }
 
+// get all keys
 func (self *MemoryConfig) All() map[string]interface{} {
 	if self.data == nil {
 		self.init()
@@ -41,20 +44,10 @@ func (self *MemoryConfig) All() map[string]interface{} {
 	return self.data
 }
 
+// Set a key to value
 func (self *MemoryConfig) Set(key string, value interface{}) {
 	if self.data == nil {
 		self.init()
 	}
 	self.data[key] = value
-}
-
-func (self *MemoryConfig) Load() error {
-	if self.data == nil {
-		self.init()
-	}
-	return nil
-}
-
-func (self *MemoryConfig) Save() error {
-	return nil
 }
