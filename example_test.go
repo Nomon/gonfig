@@ -7,27 +7,27 @@ import (
 )
 
 func ExampleHierarchy() {
-	conf := NewConfig()             // root config
-	conf.Use("second", NewConfig()) // config in hierarchy as second
+	conf := NewConfig(nil)             // root config
+	conf.Use("second", NewConfig(nil)) // config in hierarchy as second
 	conf.Use("second").Set("asd", "abc")
 	fmt.Println(conf.Get("asd"))
 	// Output: abc
 }
 
 func ExampleDefaults() {
-	conf := NewConfig() // root config
+	conf := NewConfig(nil) // root config
 	conf.Defaults.Reset(map[string]interface{}{
 		"test_default":   123,
 		"test_default_b": 321,
 	})
-	conf.Use("second", NewConfig()) // config in hierarchy as second
+	conf.Use("second", NewConfig(nil)) // config in hierarchy as second
 	conf.Use("second").Set("test_default", 333)
 	fmt.Println(conf.Get("test_default"), conf.Get("test_default_b"))
 	// Output: 333 321
 }
 
 func ExampleSaveToJson() {
-	conf := NewConfig()
+	conf := NewConfig(nil)
 	conf.Set("some", "variable")
 	jsonconf := NewJsonConfig("./config.json")
 	jsonconf.Reset(conf.All())

@@ -10,9 +10,8 @@ type ArgvConfig struct {
 	Prefix string
 }
 
-func NewArgvConfig(prefix string) Configurable {
+func NewArgvConfig(prefix string) ReadableConfig {
 	cfg := &ArgvConfig{NewMemoryConfig(), prefix}
-	cfg.Load()
 	return cfg
 }
 

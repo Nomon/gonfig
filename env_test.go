@@ -11,7 +11,7 @@ import (
 var _ = Describe("EnvConfig", func() {
 	var (
 		err error
-		cfg Configurable
+		cfg ReadableConfig
 	)
 	BeforeEach(func() {
 		cfg = NewEnvConfig("")

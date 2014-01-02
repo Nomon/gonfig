@@ -13,11 +13,12 @@ var _ = Describe("UrlConfig", func() {
 		err error
 	)
 	BeforeEach(func() {
-		cfg = NewConfig()
+		cfg = NewConfig(nil)
 	})
 	JustBeforeEach(func() {
 		cfg.Use("url", NewUrlConfig(fmt.Sprintf("http://127.0.0.1:%d", HttpPort)))
 	})
+
 	It("Should load config from URL", func() {
 		Expect(cfg).ToNot(BeNil())
 		Expect(err).ToNot(HaveOccurred())

@@ -11,7 +11,7 @@ type UrlConfig struct {
 }
 
 // Returns a new Configurable backed by JSON at url
-func NewUrlConfig(url string) *UrlConfig {
+func NewUrlConfig(url string) ReadableConfig {
 	return &UrlConfig{NewMemoryConfig(), url}
 }
 

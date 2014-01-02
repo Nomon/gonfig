@@ -9,7 +9,7 @@ import (
 var _ = Describe("ArgvConfig", func() {
 	var (
 		err error
-		cfg Configurable
+		cfg ReadableConfig
 	)
 	BeforeEach(func() {
 		cfg = NewArgvConfig("test")

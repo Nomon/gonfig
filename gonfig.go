@@ -1,40 +1,57 @@
 // package gonfig provides tools for managing hierarcial configuration from multiple sources
 package gonfig
 
-// The hierarchial Config that can be used to mount other configs that are searched for keys by Get
-type Config struct {
-	Configurable
-	// Defaults configurable, if key is not found in hierarchy Defaults will be checked.
-	Defaults Configurable
-	Configs  map[string]Configurable
-}
-
 // The main Configurable interface
-// All the single source configurations (NewJsonConfig, NewFileConfig, NewArgvConfig, NewEnvConfig, NewUrlConfig) implement it
 // Also the hierarcial configuration (Config) implements it.
 type Configurable interface {
 	// Get a configuration variable from config
 	Get(string) interface{}
-	// Set a variable
+	// Set a variable, nil to reset key
 	Set(string, interface{})
-	// Return a map of all variables
-	All() map[string]interface{}
 	// Reset the config data to passed data, if nothing is given set it to zero value
 	Reset(...map[string]interface{})
-	// Load/Save configuration
+	// Return a map of all variables
+	All() map[string]interface{}
+}
+
+type ReadableConfig interface {
+	Configurable
+	// Load the configuration
 	Load() error
+}
+
+type WritableConfig interface {
+	ReadableConfig
+	// Save configuration
 	Save() error
 }
 
+// The hierarchial Config that can be used to mount other configs that are searched for keys by Get
+type Config struct {
+	// Overrides, these are checked before Configs are iterated for key
+	Configurable
+	// named configurables, these are iterated if key is not found in Config
+	Configs map[string]Configurable
+	// Defaults configurable, if key is not found in the Configurable & Configurables in Config,
+	//Defaults is checked for fallback values
+	Defaults Configurable
+}
+
 // Creates a new config that is by default backed by a MemoryConfig Configurable
-// Defaults can be accessed from .Defaults()
-func NewConfig(configs ...Configurable) *Config {
-	cfg := &Config{
-		NewMemoryConfig(),
-		NewMemoryConfig(),
-		make(map[string]Configurable),
+// Takes optional initial configuration and an optional defaults
+func NewConfig(initial Configurable, defaults ...Configurable) *Config {
+	if initial == nil {
+		initial = NewMemoryConfig()
 	}
-	return cfg
+	def := NewMemoryConfig()
+	if len(defaults) == 1 {
+		def = defaults[0]
+	}
+	return &Config{
+		initial,
+		make(map[string]Configurable),
+		def,
+	}
 }
 
 // Resets all configs with the provided data, if no data is provided empties all stores
@@ -71,49 +88,72 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 		return self.Configs[name]
 	}
 	self.Configs[name] = config[0]
-	self.Configs[name].Load()
+
+	switch t := self.Configs[name].(type) {
+	case ReadableConfig:
+		t.Load()
+	}
 	return self.Configs[name]
 }
 
 // Gets the key from first store that it is found from, checks Defaults
 func (self *Config) Get(key string) interface{} {
+	// override from out values
 	if value := self.Configurable.Get(key); value != nil {
 		return value
 	}
-
+	// go through all in insert order untill key is found
 	for _, config := range self.Configs {
 		if value := config.Get(key); value != nil {
 			return value
 		}
 	}
-
+	// if not found check the defaults as fallback
 	if value := self.Defaults.Get(key); value != nil {
 		return value
+	}
+
+	return nil
+}
+
+func SaveConfig(config Configurable) error {
+	switch t := config.(type) {
+	case WritableConfig:
+		if err := t.Save(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Saves all Configurables in use
+func (self *Config) Save() error {
+	for _, config := range self.Configs {
+		if err := SaveConfig(config); err != nil {
+			return err
+		}
+	}
+	return SaveConfig(self.Configurable)
+}
+
+func LoadConfig(config Configurable) error {
+	switch t := config.(type) {
+	case ReadableConfig:
+		if err := t.Load(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 // calls Configurable.Load() on all Configurable objects in the hierarchy.
 func (self *Config) Load() error {
+	LoadConfig(self.Configurable)
+	LoadConfig(self.Defaults)
 	for _, config := range self.Configs {
-		if err := config.Load(); err != nil {
-			return err
-		}
+		LoadConfig(config)
 	}
-	if err := self.Configurable.Load(); err != nil {
-		return err
-	}
-	return self.Defaults.Load()
-}
-
-// Saves all Configurables in use
-func (self *Config) Save() error {
-	for _, config := range self.Configs {
-		if err := config.Save(); err != nil {
-			return err
-		}
-	}
-	return self.Configurable.Save()
+	return nil
 }
 
 // Returns a map of data from all Configurables in use

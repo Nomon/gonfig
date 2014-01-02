@@ -10,7 +10,7 @@ var _ = Describe("Gonfig", func() {
 	Describe("Config struct", func() {
 		var cfg *Config
 		BeforeEach(func() {
-			cfg = NewConfig()
+			cfg = NewConfig(nil)
 		})
 		Describe("config.Default", func() {
 			It("Should automatically create memory config for defaults", func() {
@@ -77,12 +77,12 @@ var _ = Describe("Gonfig", func() {
 			Expect(i == 3).To(BeTrue())
 		})
 		It("Should be able to use Config objects in the hierarchy", func() {
-			cfg.Use("test", NewConfig())
+			cfg.Use("test", NewConfig(nil))
 			cfg.Set("test_123", "321test")
 			Expect(cfg.Use("test").Get("test_123")).To(BeNil())
 		})
 		It("should prefere using defaults deeprer in hierarchy (reverse order to normal fetch.)", func() {
-			deeper := NewConfig()
+			deeper := NewConfig(nil)
 			deeper.Defaults.Reset(map[string]interface{}{
 				"test":  123,
 				"testb": 321,
@@ -95,7 +95,6 @@ var _ = Describe("Gonfig", func() {
 			Expect(cfg.Get("testb")).To(Equal(321))
 			cfg.Set("testb", 1)
 			Expect(cfg.Get("testb")).To(Equal(1))
-
 		})
 	})
 })

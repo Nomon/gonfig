@@ -9,8 +9,9 @@ import (
 var _ = Describe("JsonConfig", func() {
 	var (
 		err error
-		cfg Configurable
+		cfg WritableConfig
 	)
+
 	BeforeEach(func() {
 		cfg = NewJsonConfig("./config_valid.json")
 		err = cfg.Load()
@@ -58,7 +59,7 @@ var _ = Describe("JsonConfig", func() {
 
 	Describe("Config conversion", func() {
 		It("Should be possible ro construct new JSON config from a gonfig hierarchy", func() {
-			cfg := NewConfig()
+			cfg := NewConfig(nil)
 			cfg.Use("config_a", NewMemoryConfig())
 			cfg.Use("config_b", NewMemoryConfig())
 			cfg.Use("config_a").Set("config_a_var_a", "conf_a")

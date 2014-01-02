@@ -10,7 +10,7 @@ type EnvConfig struct {
 	Prefix string
 }
 
-func NewEnvConfig(prefix string) Configurable {
+func NewEnvConfig(prefix string) ReadableConfig {
 	cfg := &EnvConfig{NewMemoryConfig(), prefix}
 	cfg.Load()
 	return cfg

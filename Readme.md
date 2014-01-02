@@ -10,134 +10,142 @@ Available via: [![Codebot](https://codebot.io/badge/github.com/Nomon/gonfig.png)
 
 ### Api
 
-All the config types including the root implement the Configurable interface:
+All the config types including the root implement the Configurable interface.
 
 ```go
-// The main Configurable interface
-// All the single source configurations (NewJsonConfig, NewFileConfig, NewArgvConfig, 
-// NewEnvConfig, NewUrlConfig) implement it.
+/ The main Configurable interface
 // Also the hierarcial configuration (Config) implements it.
 type Configurable interface {
   // Get a configuration variable from config
   Get(string) interface{}
-  // Set a variable
+  // Set a variable, nil to reset key
   Set(string, interface{})
-  // Return a map of all variables
-  All() map[string]interface{}
   // Reset the config data to passed data, if nothing is given set it to zero value
   Reset(...map[string]interface{})
-  // Loads the config, ie. from disk/url
-  Load() error
-  // Save the config. To file or Post to url.
+  // Return a map of all variables
+  All() map[string]interface{}
+}
+
+type WritebleConfig interface {
+  ReadableConfig
+  // Save configuration
   Save() error
 }
 
+type ReadableConfig interface {
+  Configurable
+  // Load the configuration
+  Load() error
+}
 
-// Config struct
-type struct Config {
-  // Returns the Defaults() memory configration
-  // This configuration is used if variable is not found in the hierarchy
-  // Defaults can be set to a configration:
-  //  conf.Defaults().Reset(map[string]interface{} (
-  //    "key": "value",
-  //  ))
-  Defaults()
-
-  // Mounts a new configuration in the hierarchy
-  // conf.Use("global", NewUrlConfig("http://host.com/config.json"))
-  // conf.Use("local", NewFileConfig("./config.json"))
-  // err := conf.Load();
-  // then get variable from specific config
-  // conf.Use("global").Get("key")
-  // or traverse the hierarchy and search for "key"
-  // conf.Get("key") 
-  Use(string name, c ...Configurable)
+// The hierarchial Config that can be used to mount other configs that are searched for keys by Get
+type Config struct {
+  // Overrides, these are checked before Configs are iterated for key
+  Configurable
+  // named configurables, these are iterated if key is not found in Config
+  Configs map[string]Configurable
+  // Defaults configurable, if key is not found in the Configurable & Configurables in Config,
+  //Defaults is checked for fallback values
+  Defaults Configurable
 }
 
 ```
 
 ### Usage & Examples
 
-For more examples check out the [example_test.go](https://github.com/Nomon/gonfig/blob/master/example_test.go)
+For more examples check out [example_test.go](https://github.com/Nomon/gonfig/blob/master/example_test.go)
+
 
 ```go
-package main
+  // Create a new root node for our hierarchical configuration
+  conf := NewConfig(nil)
 
-import (
-  . "github.com/Nomon/gonfig"
-  "log"
-)
+  // setting to the rootnode makes the variable found first, so it acts as an override for all the other
+  // configurations set in the config.
+  conf.Set("always", true);
 
-func main() {
-  conf := NewConfig()
-  conf.Defaults().Reset(map[string]interface{}{
-    "PATH": "/dome/configured/path",
-    "a":    3711,
-    "b":    2138,
-    "c":    1908,
-    "d":    912,
+  // use commandline variables myapp.*, ie --myapp-rules
+  conf.Use("argv"), NewNewArgvConfig("myapp.*"))
+
+  // use env variables MYAPP_*
+  conf.Use("env", NewEnvConfig("MYAPP_"))
+
+  // load local config file
+  conf.Use("local", NewJsonConfig("./config.json"))
+
+  // load global config file over the network
+  conf.Use("global", NewUrlConfig("http://myapp.com/config/globals.json"))
+
+  // Set some Defaults, if conf.Get() fails to find from any of the above configurations it will fall back to these.
+  conf.Defaults.Reset(map[string]interface{}{
+    "database": "127.0.0.1",
+    "temp_dir":"/tmp",
+    "always": false,
   })
-  // use a configuration file
-  conf.Use("json", NewJsonConfig("./config.json"))
-  // also include all env variables, wioth optional prefix lookup
-  // SETTINGS_DB="xyz" can be captured to "DB" with NewEnvConfig("SETTINGS_")
-  conf.Use("env", NewEnvConfig(""))
-  // Take in all commandline flags
-  // prefix can be specified to pick only under named flagset
-  // ie  NewArgvConfig("test")) to capture --test.asd into asd
-  conf.Use("argv", NewArgvConfig(""))
 
-  // real PATH in env, the lookup order for root config is the addition order,
-  // so first form Defaults(), then from json, env, path and latest found is returned.
-  log.Println("PATH in conf", conf.Get("PATH"))
-  // /dome/configured/path
-  // .Defaults() is shorthand for .Use("defaults")
-  log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
-  // /dome/configured/path
-  log.Println("Default PATH in env conf", conf.Use("env").Get("PATH"))
+  log.Println("Database host in network configuration",conf.Use("global").Get("database"))
+  log.Println("Database host resolved from hierarchy",conf.Get("database"))
 
-  conf.Set("PATH", "/new/path")
-  // the new changed path
-  log.Println("PATH in conf", conf.Get("PATH"))
-  // /dome/configured/path
-  // .Set on root configuration wont override Defaults
-  log.Println("Default PATH in conf", conf.Defaults().Get("PATH"))
-
-  conf.Use("json").Set("abcd", "1234")
-  if err := conf.Use("json").Save(); err != nil {
-    log.Println(err)
-    return
+  // Save the hierarchy to a JSON file:
+  jsonconf := NewJsonConf("./new_config.json")
+  jsonconf.Reset(conf.All())
+  if err := jsonconf.Save(); err != nil {
+    log.Fatalln("Failed saving json config at path",jsonconf.Path,err)
   }
-  // reset config and reload from disk
-  conf.Use("json").Reset()
-  conf.Use("json").Load()
-  // 1234
-  log.Println("abcd from loaded json config", conf.Use("json").Get("abcd"))
 }
 
 ```
 
-Or Directly:
+### Extending
+
+Extending Gonfig is easy using the MemoryConfig or JsonConfig as a base, depending on the Save needs.
+Here is an example implementation using a file with line separated key=value pairs for storage.
+
 
 ```go
-func main() {
-  conf := NewMomoryConfig();
-  conf.Set("asd", "1234")
-  log.Println("asd:", conf.Get("asd"))
-  jsonconf := NewJsonConfig("./config.json");
-  if err := jsonconf.Load(); err != nil {
-    log.Println("Error loading conf", err)
-    return
+type KVFileConfig struct {
+  Configurable
+  Path string
+}
+
+func NewKVFileConfig(path string) WritableConfig {
+  return &KVFileConfig{NewMemoryConfig(), path}
+}
+
+func (self *KVFileConfig) Load() (err error) {
+  var file *os.File
+
+  if file, err = os.Open(self.Path); err != nil {
+    return err
   }
-  jsonconf.Set("asd", "1234")
-  log.Println("asd:", jsonconf.Get("asd"))
-  if err := jsonconf.Save(); err != nil {
-    log.Println("config failed to save",err)
-    return
+  defer file.Close()
+
+  scanner := bufio.NewScanner(file)
+  for scanner.Scan() {
+    fmt.Println(scanner.Text())
+    parts := strings.Split(scanner.Text(), "=")
+    if len(parts) == 2 {
+      self.Set(parts[0], parts[1])
+    }
   }
-  log.Println("asd:1234 saved to config.json")
+  return scanner.Err();
+}
+
+func (self *KVFileConfig) Save() (err error) {
+  var file *os.File;
+  if file, err = os.Create(self.Path); err != nil {
+    return err
+  }
+  defer file.Close();
+  for k, v := range self.All() {
+    if _, err = file.WriteString(k + "=" + fmt.Sprint("",v) + "\r\n"); err != nil {
+      return err
+    }
+  }
+  return nil
 }
 ```
+
 
 ## License
 
