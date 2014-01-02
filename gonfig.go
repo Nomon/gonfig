@@ -14,19 +14,21 @@ type Configurable interface {
 	All() map[string]interface{}
 }
 
+// A Configurable that can be loaded
 type ReadableConfig interface {
 	Configurable
 	// Load the configuration
 	Load() error
 }
 
+// A Configurable that can be Loaded & Saved
 type WritableConfig interface {
 	ReadableConfig
 	// Save configuration
 	Save() error
 }
 
-// The hierarchial Config that can be used to mount other configs that are searched for keys by Get
+// The Hierarchical Config that can be used to mount other configs that are searched for keys by Get
 type Config struct {
 	// Overrides, these are checked before Configs are iterated for key
 	Configurable
@@ -42,7 +44,10 @@ type Config struct {
 func NewConfig(initial Configurable, defaults ...Configurable) *Config {
 	if initial == nil {
 		initial = NewMemoryConfig()
+	} else {
+		LoadConfig(initial)
 	}
+
 	def := NewMemoryConfig()
 	if len(defaults) == 1 {
 		def = defaults[0]
@@ -80,6 +85,7 @@ func (self *Config) Reset(datas ...map[string]interface{}) {
 // conf.Use("global").Get("key").
 // or traverse the hierarchy and search for "key".
 // conf.Get("key").
+// conf.Use("name") returns a nil value for non existing config named "name".
 func (self *Config) Use(name string, config ...Configurable) Configurable {
 	if self.Configs == nil {
 		self.Configs = make(map[string]Configurable)
@@ -88,11 +94,7 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 		return self.Configs[name]
 	}
 	self.Configs[name] = config[0]
-
-	switch t := self.Configs[name].(type) {
-	case ReadableConfig:
-		t.Load()
-	}
+	LoadConfig(self.Configs[name])
 	return self.Configs[name]
 }
 
@@ -116,9 +118,11 @@ func (self *Config) Get(key string) interface{} {
 	return nil
 }
 
+// Save config it is of type WritableConfig, otherwise does nothing.
 func SaveConfig(config Configurable) error {
 	switch t := config.(type) {
 	case WritableConfig:
+
 		if err := t.Save(); err != nil {
 			return err
 		}
@@ -126,7 +130,7 @@ func SaveConfig(config Configurable) error {
 	return nil
 }
 
-// Saves all Configurables in use
+// Saves all mounted configurations in the hierarchy that implement the WritableConfig interface
 func (self *Config) Save() error {
 	for _, config := range self.Configs {
 		if err := SaveConfig(config); err != nil {
@@ -136,6 +140,7 @@ func (self *Config) Save() error {
 	return SaveConfig(self.Configurable)
 }
 
+// Load config it is of type ReadableConfig, otherwise does nothing.
 func LoadConfig(config Configurable) error {
 	switch t := config.(type) {
 	case ReadableConfig:

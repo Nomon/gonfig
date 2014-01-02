@@ -29,10 +29,11 @@ func ExampleDefaults() {
 func ExampleSaveToJson() {
 	conf := NewConfig(nil)
 	conf.Set("some", "variable")
-	jsonconf := NewJsonConfig("./config.json")
-	jsonconf.Reset(conf.All())
+	jsonconf := NewJsonConfig("./config.json", conf)
+	jsonconf.Save()
 	// OR:
-	// jsonconf := &JsonConf{conf, "./config.json"}
+	// jsonconf := NewJsonConf("./config")
+	// jsonconf.Reset(conf.All());
 	// jsonconf.Save()
 
 	if err := jsonconf.Save(); err != nil {
