@@ -6,19 +6,16 @@ import (
 )
 
 type UrlConfig struct {
-	*MemoryConfig
+	Configurable
 	url string
 }
 
 // Returns a new Configurable backed by JSON at url
 func NewUrlConfig(url string) *UrlConfig {
-	return &UrlConfig{&MemoryConfig{}, url}
+	return &UrlConfig{NewMemoryConfig(), url}
 }
 
 func (self *UrlConfig) Load() error {
-	if self.data == nil {
-		self.initialize()
-	}
 	resp, err := http.Get(self.url)
 	if err != nil {
 		return err
@@ -28,10 +25,10 @@ func (self *UrlConfig) Load() error {
 	if err != nil {
 		return err
 	}
-	out, err := self.unmarshal(body)
+	out, err := unmarshalJson(body)
 	if err != nil {
 		return err
 	}
-	self.data = out
+	self.Reset(out)
 	return nil
 }

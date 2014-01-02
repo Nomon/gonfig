@@ -6,44 +6,46 @@ import (
 )
 
 type JsonConfig struct {
-	*MemoryConfig
-	path string
+	Configurable
+	Path string
+}
+
+func unmarshalJson(bytes []byte) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	if err := json.Unmarshal(bytes, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // Returns a new Configurable backed by a json file at path.
 // The file does not need to exist, if it does not exist the first Save call will create it.
 func NewJsonConfig(path string) Configurable {
-	cfg := &JsonConfig{&MemoryConfig{}, path}
+	cfg := &JsonConfig{NewMemoryConfig(), path}
 	cfg.Load()
 	return cfg
 }
 
 func (self *JsonConfig) Load() (err error) {
-	if self.data == nil {
-		self.initialize()
-	}
 	var data []byte = make([]byte, 1024)
-	if data, err = ioutil.ReadFile(self.path); err != nil {
+	if data, err = ioutil.ReadFile(self.Path); err != nil {
 		return err
 	}
-	out, err := self.unmarshal(data)
+	out, err := unmarshalJson(data)
 	if err != nil {
 		return err
 	}
-	self.data = out
+	self.Configurable.Reset(out)
 	return nil
 }
 
 func (self *JsonConfig) Save() (err error) {
-	if self.data == nil {
-		self.initialize()
-	}
-	b, err := json.Marshal(self.data)
+	b, err := json.Marshal(self.Configurable.All())
 	if err != nil {
 		return err
 	}
 
-	if err := ioutil.WriteFile(self.path, b, 0600); err != nil {
+	if err := ioutil.WriteFile(self.Path, b, 0600); err != nil {
 		return err
 	}
 

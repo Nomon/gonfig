@@ -14,13 +14,13 @@ var _ = Describe("Gonfig", func() {
 		})
 		Describe("config.Default", func() {
 			It("Should automatically create memory config for defaults", func() {
-				defaults := cfg.Defaults()
+				defaults := cfg.Defaults
 				Expect(defaults).ToNot(BeNil())
 				memconf := NewMemoryConfig()
 				memconf.Set("a", "b")
-				cfg.Defaults().Reset(memconf.All())
+				cfg.Defaults.Reset(memconf.All())
 				Expect(cfg.Get("a")).To(Equal("b"))
-				Expect(cfg.Defaults().Get("a")).To(Equal("b"))
+				Expect(cfg.Defaults.Get("a")).To(Equal("b"))
 			})
 		})
 		It("Should use memory store to set and get by default", func() {
@@ -31,18 +31,18 @@ var _ = Describe("Gonfig", func() {
 			Expect(cfg.Get("some-key")).To(BeNil())
 		})
 		It("Should return and use Defaults", func() {
-			cfg.Defaults().Set("test_var", "abc")
-			Ω(cfg.Defaults().Get("test_var")).Should(Equal("abc"))
+			cfg.Defaults.Set("test_var", "abc")
+			Ω(cfg.Defaults.Get("test_var")).Should(Equal("abc"))
 			cfg.Set("test_var", "bca")
-			Ω(cfg.Defaults().Get("test_var")).Should(Equal("abc"), "Setting to memory should not override defaults")
+			Ω(cfg.Defaults.Get("test_var")).Should(Equal("abc"), "Setting to memory should not override defaults")
 			Ω(cfg.Get("test_var")).Should(Equal("bca"), "Set to config should set in memory and use it over defaults")
 		})
 
 		It("Should reset everything else but Defaults() on reset", func() {
-			cfg.Defaults().Set("test_var", "abc")
-			Ω(cfg.Defaults().Get("test_var")).Should(Equal("abc"))
+			cfg.Defaults.Set("test_var", "abc")
+			Ω(cfg.Defaults.Get("test_var")).Should(Equal("abc"))
 			cfg.Set("test_var", "bca")
-			Ω(cfg.Defaults().Get("test_var")).Should(Equal("abc"), "Setting to memory should not override defaults")
+			Ω(cfg.Defaults.Get("test_var")).Should(Equal("abc"), "Setting to memory should not override defaults")
 			Ω(cfg.Get("test_var")).Should(Equal("bca"), "Set to config should set in memory and use it over defaults")
 			cfg.Reset()
 			Ω(cfg.Get("test_var")).Should(Equal("abc"), "Set to config should set in memory and use it over defaults")
@@ -51,7 +51,7 @@ var _ = Describe("Gonfig", func() {
 		It("Should load & save all relevant sources", func() {
 			cfg.Use("json1", NewJsonConfig("./config_test_1.json"))
 			cfg.Use("json2", NewJsonConfig("./config_test_2.json"))
-			cfg.Set("asd", "123")
+			cfg.Use("json2").Set("asd", "123")
 			cfg.Use("json1").Set("asd", "321")
 			err := cfg.Save()
 			Expect(err).ToNot(HaveOccurred())
@@ -79,11 +79,23 @@ var _ = Describe("Gonfig", func() {
 		It("Should be able to use Config objects in the hierarchy", func() {
 			cfg.Use("test", NewConfig())
 			cfg.Set("test_123", "321test")
-			Expect(cfg.Use("test").Get("test_123")).To(Equal("321test"))
-			cfg.Use("memory").Set("test_123", "asd")
-			Expect(cfg.Use("test").Get("test_123")).To(Equal("321test"))
-			Expect(cfg.Use("memory").Get("test_123")).To(Equal("asd"))
-			Expect(cfg.Get("test_123")).To(Equal("asd"))
+			Expect(cfg.Use("test").Get("test_123")).To(BeNil())
+		})
+		It("should prefere using defaults deeprer in hierarchy (reverse order to normal fetch.)", func() {
+			deeper := NewConfig()
+			deeper.Defaults.Reset(map[string]interface{}{
+				"test":  123,
+				"testb": 321,
+			})
+			cfg.Use("test", deeper)
+			cfg.Defaults.Reset(map[string]interface{}{
+				"test": 333,
+			})
+			Expect(cfg.Get("test")).To(Equal(123))
+			Expect(cfg.Get("testb")).To(Equal(321))
+			cfg.Set("testb", 1)
+			Expect(cfg.Get("testb")).To(Equal(1))
+
 		})
 	})
 })

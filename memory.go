@@ -1,9 +1,6 @@
 package gonfig
 
-import (
-	"encoding/json"
-)
-
+// MemoryConfig is a simple abstraction to map[]interface{} for in process memory backed configuration
 type MemoryConfig struct {
 	data map[string]interface{}
 }
@@ -11,60 +8,49 @@ type MemoryConfig struct {
 // Returns a new memory backed Configurable
 // The most basic Configurable simply backed by a map[string]interface{}
 func NewMemoryConfig() Configurable {
-	cfg := &MemoryConfig{
-		data: make(map[string]interface{}, 10),
-	}
-	cfg.Load()
+	cfg := &MemoryConfig{make(map[string]interface{})}
+	cfg.init()
 	return cfg
 }
 
-// private methods
-func (self *MemoryConfig) unmarshal(bytes []byte) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	if err := json.Unmarshal(bytes, &out); err != nil {
-		return nil, err
-	}
-	return out, nil
+func (self *MemoryConfig) init() {
+	self.data = make(map[string]interface{})
 }
 
-func (self *MemoryConfig) initialize() {
-	self.data = make(map[string]interface{}, 10)
-}
-
-//public methods
-
+// if no arguments are proced Reset() re-creates the underlaying map
 func (self *MemoryConfig) Reset(datas ...map[string]interface{}) {
-	if len(datas) == 0 {
-		self.initialize()
-		return
+	if len(datas) >= 1 {
+		self.data = datas[0]
+	} else {
+		self.data = make(map[string]interface{})
 	}
-	self.data = datas[0]
+	return
 }
 
 func (self *MemoryConfig) Get(key string) interface{} {
 	if self.data == nil {
-		self.initialize()
+		self.init()
 	}
 	return self.data[key]
 }
 
 func (self *MemoryConfig) All() map[string]interface{} {
 	if self.data == nil {
-		self.initialize()
+		self.init()
 	}
 	return self.data
 }
 
 func (self *MemoryConfig) Set(key string, value interface{}) {
 	if self.data == nil {
-		self.initialize()
+		self.init()
 	}
 	self.data[key] = value
 }
 
 func (self *MemoryConfig) Load() error {
 	if self.data == nil {
-		self.initialize()
+		self.init()
 	}
 	return nil
 }

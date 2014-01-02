@@ -16,7 +16,7 @@ func ExampleHierarchy() {
 
 func ExampleDefaults() {
 	conf := NewConfig() // root config
-	conf.Defaults().Reset(map[string]interface{}{
+	conf.Defaults.Reset(map[string]interface{}{
 		"test_default":   123,
 		"test_default_b": 321,
 	})
@@ -31,6 +31,10 @@ func ExampleSaveToJson() {
 	conf.Set("some", "variable")
 	jsonconf := NewJsonConfig("./config.json")
 	jsonconf.Reset(conf.All())
+	// OR:
+	// jsonconf := &JsonConf{conf, "./config.json"}
+	// jsonconf.Save()
+
 	if err := jsonconf.Save(); err != nil {
 		fmt.Println("Error saving config", err)
 	}
