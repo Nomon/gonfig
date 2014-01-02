@@ -18,14 +18,21 @@ func unmarshalJson(bytes []byte) (map[string]interface{}, error) {
 	return out, nil
 }
 
-// Returns a new Configurable backed by a json file at path.
+// Returns a new WritableConfig backed by a json file at path.
 // The file does not need to exist, if it does not exist the first Save call will create it.
-func NewJsonConfig(path string) WritableConfig {
-	cfg := &JsonConfig{NewMemoryConfig(), path}
-	cfg.Load()
-	return cfg
+func NewJsonConfig(path string, cfg ...Configurable) WritableConfig {
+	backing := NewMemoryConfig()
+	if len(cfg) > 0 {
+		backing = cfg[0]
+		LoadConfig(backing)
+	}
+	conf := &JsonConfig{backing, path}
+	LoadConfig(conf)
+	return conf
 }
 
+// Attempts to load the json configuration at JsonConfig.Path
+// and Set them into the underlaying Configurable
 func (self *JsonConfig) Load() (err error) {
 	var data []byte = make([]byte, 1024)
 	if data, err = ioutil.ReadFile(self.Path); err != nil {
@@ -39,6 +46,7 @@ func (self *JsonConfig) Load() (err error) {
 	return nil
 }
 
+// Attempts to save the configuration from the underlaying Configurable to json file at JsonConfig.Path
 func (self *JsonConfig) Save() (err error) {
 	b, err := json.Marshal(self.Configurable.All())
 	if err != nil {

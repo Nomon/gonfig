@@ -67,6 +67,9 @@ var _ = Describe("JsonConfig", func() {
 			jsonConf := &JsonConfig{cfg, "./config.json"}
 			err := jsonConf.Save()
 			Expect(err).ToNot(HaveOccurred())
+			jsonConf2 := NewJsonConfig("./config.json", cfg)
+			err = jsonConf2.Save()
+			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 
