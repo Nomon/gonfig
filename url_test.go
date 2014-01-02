@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("UrlConfig", func() {
 	var (
-		cfg *Config
+		cfg *Gonfig
 		err error
 	)
 	BeforeEach(func() {

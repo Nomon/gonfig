@@ -28,8 +28,18 @@ type WritableConfig interface {
 	Save() error
 }
 
+// a Configurable that can Use other Configurables thus build a hierarchy
+type Config interface {
+	WritableConfig
+	// Use config as name, .Use("name") without the second parameter returns
+	// the config previously added to the hierarchy with the name.
+	// Use("name", Configurable) adds or replaces the configurable designated by "Name" in
+	// the hierarchy
+	Use(name string, config ...Configurable) Configurable
+}
+
 // The Hierarchical Config that can be used to mount other configs that are searched for keys by Get
-type Config struct {
+type Gonfig struct {
 	// Overrides, these are checked before Configs are iterated for key
 	Configurable
 	// named configurables, these are iterated if key is not found in Config
@@ -39,9 +49,12 @@ type Config struct {
 	Defaults Configurable
 }
 
+// Ensure Gonfig implements Config
+var _ Config = (*Gonfig)(nil)
+
 // Creates a new config that is by default backed by a MemoryConfig Configurable
 // Takes optional initial configuration and an optional defaults
-func NewConfig(initial Configurable, defaults ...Configurable) *Config {
+func NewConfig(initial Configurable, defaults ...Configurable) *Gonfig {
 	if initial == nil {
 		initial = NewMemoryConfig()
 	} else {
@@ -52,7 +65,7 @@ func NewConfig(initial Configurable, defaults ...Configurable) *Config {
 	if len(defaults) == 1 {
 		def = defaults[0]
 	}
-	return &Config{
+	return &Gonfig{
 		initial,
 		make(map[string]Configurable),
 		def,
@@ -61,7 +74,7 @@ func NewConfig(initial Configurable, defaults ...Configurable) *Config {
 
 // Resets all configs with the provided data, if no data is provided empties all stores
 // Never touches the Defaults, to reset Defaults use Config.Defaults().Reset()
-func (self *Config) Reset(datas ...map[string]interface{}) {
+func (self *Gonfig) Reset(datas ...map[string]interface{}) {
 	var data map[string]interface{}
 	if len(datas) > 0 {
 		data = datas[0]
@@ -86,7 +99,7 @@ func (self *Config) Reset(datas ...map[string]interface{}) {
 // or traverse the hierarchy and search for "key".
 // conf.Get("key").
 // conf.Use("name") returns a nil value for non existing config named "name".
-func (self *Config) Use(name string, config ...Configurable) Configurable {
+func (self *Gonfig) Use(name string, config ...Configurable) Configurable {
 	if self.Configs == nil {
 		self.Configs = make(map[string]Configurable)
 	}
@@ -99,7 +112,7 @@ func (self *Config) Use(name string, config ...Configurable) Configurable {
 }
 
 // Gets the key from first store that it is found from, checks Defaults
-func (self *Config) Get(key string) interface{} {
+func (self *Gonfig) Get(key string) interface{} {
 	// override from out values
 	if value := self.Configurable.Get(key); value != nil {
 		return value
@@ -131,7 +144,7 @@ func SaveConfig(config Configurable) error {
 }
 
 // Saves all mounted configurations in the hierarchy that implement the WritableConfig interface
-func (self *Config) Save() error {
+func (self *Gonfig) Save() error {
 	for _, config := range self.Configs {
 		if err := SaveConfig(config); err != nil {
 			return err
@@ -152,7 +165,7 @@ func LoadConfig(config Configurable) error {
 }
 
 // calls Configurable.Load() on all Configurable objects in the hierarchy.
-func (self *Config) Load() error {
+func (self *Gonfig) Load() error {
 	LoadConfig(self.Configurable)
 	LoadConfig(self.Defaults)
 	for _, config := range self.Configs {
@@ -171,7 +184,7 @@ func (self *Config) Load() error {
 // Config.All()["a"] == "1".
 // Config.Get("a") == "1".
 // Config.Use("b".).Get("a") == "2".
-func (self *Config) All() map[string]interface{} {
+func (self *Gonfig) All() map[string]interface{} {
 	values := make(map[string]interface{})
 	// put defaults in values
 	for key, value := range self.Defaults.All() {
