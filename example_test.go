@@ -55,4 +55,5 @@ func ExampleConstruction() {
 	cfg2 := NewConfig(&cfg)
 	fmt.Println(cfg2.All())
 	// Output: 123
+	// map[example1:123]
 }
