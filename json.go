@@ -2,6 +2,7 @@ package gonfig
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
 
@@ -10,23 +11,42 @@ type JsonConfig struct {
 	Path string
 }
 
-func unmarshalJson(bytes []byte) (map[string]interface{}, error) {
+func unmarshalJson(bytes []byte) (map[string]string, error) {
 	out := make(map[string]interface{})
 	if err := json.Unmarshal(bytes, &out); err != nil {
 		return nil, err
 	}
-	return out, nil
+	var output map[string]string = make(map[string]string)
+
+	for k, v := range out {
+		switch v := v.(type) {
+		case int:
+			output[k] = fmt.Sprintf("%d", v)
+		case float64:
+			output[k] = fmt.Sprintf("%f", v)
+		case string:
+			output[k] = v
+		case bool:
+			if v {
+				output[k] = "true"
+			} else {
+				output[k] = "false"
+			}
+		default:
+			// i isn't one of the types above
+		}
+	}
+	return output, nil
 }
 
 // Returns a new WritableConfig backed by a json file at path.
 // The file does not need to exist, if it does not exist the first Save call will create it.
 func NewJsonConfig(path string, cfg ...Configurable) WritableConfig {
-	backing := NewMemoryConfig()
-	if len(cfg) > 0 {
-		backing = cfg[0]
-		LoadConfig(backing)
+	if len(cfg) == 0 {
+		cfg = append(cfg, NewMemoryConfig())
 	}
-	conf := &JsonConfig{backing, path}
+	LoadConfig(cfg[0])
+	conf := &JsonConfig{cfg[0], path}
 	LoadConfig(conf)
 	return conf
 }
@@ -42,6 +62,7 @@ func (self *JsonConfig) Load() (err error) {
 	if err != nil {
 		return err
 	}
+
 	self.Configurable.Reset(out)
 	return nil
 }

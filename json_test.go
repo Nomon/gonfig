@@ -33,8 +33,8 @@ var _ = Describe("JsonConfig", func() {
 		})
 		It("should return a functional config", func() {
 			Expect(cfg).ToNot(BeZero())
-			cfg.Set("QQ", 123)
-			Expect(cfg.Get("QQ")).To(Equal(123))
+			cfg.Set("QQ", "123")
+			Expect(cfg.Get("QQ")).To(Equal("123"))
 		})
 
 		It("should error", func() {
@@ -49,8 +49,8 @@ var _ = Describe("JsonConfig", func() {
 		})
 		It("should return a functional config", func() {
 			Expect(cfg).ToNot(BeZero())
-			cfg.Set("QQ", 123)
-			Expect(cfg.Get("QQ")).To(Equal(123))
+			cfg.Set("QQ", "123")
+			Expect(cfg.Get("QQ")).To(Equal("123"))
 		})
 		It("should error", func() {
 			Expect(err).To(HaveOccurred())

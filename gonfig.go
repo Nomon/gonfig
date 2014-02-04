@@ -1,17 +1,24 @@
 // package gonfig provides tools for managing hierarcial configuration from multiple sources
 package gonfig
 
+import (
+	"fmt"
+	"reflect"
+	"strconv"
+	"strings"
+)
+
 // The main Configurable interface
 // Also the hierarcial configuration (Config) implements it.
 type Configurable interface {
 	// Get a configuration variable from config
-	Get(string) interface{}
+	Get(string) string
 	// Set a variable, nil to reset key
-	Set(string, interface{})
+	Set(string, string)
 	// Reset the config data to passed data, if nothing is given set it to zero value
-	Reset(...map[string]interface{})
+	Reset(...map[string]string)
 	// Return a map of all variables
-	All() map[string]interface{}
+	All() map[string]string
 }
 
 // A Configurable that can be loaded
@@ -60,22 +67,52 @@ func NewConfig(initial Configurable, defaults ...Configurable) *Gonfig {
 	} else {
 		LoadConfig(initial)
 	}
-
-	def := NewMemoryConfig()
-	if len(defaults) == 1 {
-		def = defaults[0]
+	if len(defaults) == 0 {
+		defaults = append(defaults, NewMemoryConfig())
 	}
+
 	return &Gonfig{
 		initial,
 		make(map[string]Configurable),
-		def,
+		defaults[0],
 	}
+}
+
+// Marshal current configuration hierarchy into target using gonfig:
+func (self *Gonfig) Marshal(target interface{}) error {
+	value := reflect.Indirect(reflect.ValueOf(target))
+	typ := value.Type()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+
+		v := strings.TrimSpace(self.Get(field.Tag.Get("gonfig")))
+		if v == "" {
+			continue
+		}
+
+		// Set the appropriate type.
+		switch field.Type.Kind() {
+		case reflect.Bool:
+			value.Field(i).SetBool(v != "0" && v != "false")
+		case reflect.Int:
+			newValue, err := strconv.ParseInt(v, 10, 0)
+			if err != nil {
+				return fmt.Errorf("Parse error: %s: %s", field.Tag.Get("env"), err)
+			}
+			value.Field(i).SetInt(newValue)
+		case reflect.String:
+			value.Field(i).SetString(v)
+		case reflect.Slice:
+			value.Field(i).Set(reflect.ValueOf(trimsplit(v, ",")))
+		}
+	}
+	return nil
 }
 
 // Resets all configs with the provided data, if no data is provided empties all stores
 // Never touches the Defaults, to reset Defaults use Config.Defaults().Reset()
-func (self *Gonfig) Reset(datas ...map[string]interface{}) {
-	var data map[string]interface{}
+func (self *Gonfig) Reset(datas ...map[string]string) {
+	var data map[string]string
 	if len(datas) > 0 {
 		data = datas[0]
 	}
@@ -112,23 +149,23 @@ func (self *Gonfig) Use(name string, config ...Configurable) Configurable {
 }
 
 // Gets the key from first store that it is found from, checks Defaults
-func (self *Gonfig) Get(key string) interface{} {
+func (self *Gonfig) Get(key string) string {
 	// override from out values
-	if value := self.Configurable.Get(key); value != nil {
+	if value := self.Configurable.Get(key); value != "" {
 		return value
 	}
 	// go through all in insert order untill key is found
 	for _, config := range self.Configs {
-		if value := config.Get(key); value != nil {
+		if value := config.Get(key); value != "" {
 			return value
 		}
 	}
 	// if not found check the defaults as fallback
-	if value := self.Defaults.Get(key); value != nil {
+	if value := self.Defaults.Get(key); value != "" {
 		return value
 	}
 
-	return nil
+	return ""
 }
 
 // Save config it is of type WritableConfig, otherwise does nothing.
@@ -184,27 +221,38 @@ func (self *Gonfig) Load() error {
 // Config.All()["a"] == "1".
 // Config.Get("a") == "1".
 // Config.Use("b".).Get("a") == "2".
-func (self *Gonfig) All() map[string]interface{} {
-	values := make(map[string]interface{})
+func (self *Gonfig) All() map[string]string {
+	values := make(map[string]string)
 	// put defaults in values
 	for key, value := range self.Defaults.All() {
-		if values[key] == nil {
+		if values[key] == "" {
 			values[key] = value
 		}
 	}
 	// put config values on top of them
 	for _, config := range self.Configs {
 		for key, value := range config.All() {
-			if values[key] == nil {
+			if values[key] == "" {
 				values[key] = value
 			}
 		}
 	}
 	// put overrides from self on top of all
 	for key, value := range self.Configurable.All() {
-		if values[key] == nil {
+		if values[key] == "" {
 			values[key] = value
 		}
 	}
 	return values
+}
+
+// trimsplit slices s into all substrings separated by sep and returns a
+// slice of the substrings between the separator with all leading and trailing
+// white space removed, as defined by Unicode.
+func trimsplit(s, sep string) []string {
+	trimmed := strings.Split(s, sep)
+	for i := range trimmed {
+		trimmed[i] = strings.TrimSpace(trimmed[i])
+	}
+	return trimmed
 }

@@ -24,11 +24,11 @@ var _ = Describe("Gonfig", func() {
 			})
 		})
 		It("Should use memory store to set and get by default", func() {
-			cfg.Set("test_a", 10)
+			cfg.Set("test_a", "10")
 			Ω(cfg.Get("test_a")).Should(Equal(cfg.Get("test_a")))
 		})
 		It("Should return nil when key is non-existing", func() {
-			Expect(cfg.Get("some-key")).To(BeNil())
+			Expect(cfg.Get("some-key")).To(Equal(""))
 		})
 		It("Should return and use Defaults", func() {
 			cfg.Defaults.Set("test_var", "abc")
@@ -79,22 +79,22 @@ var _ = Describe("Gonfig", func() {
 		It("Should be able to use Config objects in the hierarchy", func() {
 			cfg.Use("test", NewConfig(nil))
 			cfg.Set("test_123", "321test")
-			Expect(cfg.Use("test").Get("test_123")).To(BeNil())
+			Expect(cfg.Use("test").Get("test_123")).To(Equal(""))
 		})
 		It("should prefere using defaults deeprer in hierarchy (reverse order to normal fetch.)", func() {
 			deeper := NewConfig(nil)
-			deeper.Defaults.Reset(map[string]interface{}{
-				"test":  123,
-				"testb": 321,
+			deeper.Defaults.Reset(map[string]string{
+				"test":  "123",
+				"testb": "321",
 			})
 			cfg.Use("test", deeper)
-			cfg.Defaults.Reset(map[string]interface{}{
-				"test": 333,
+			cfg.Defaults.Reset(map[string]string{
+				"test": "333",
 			})
-			Expect(cfg.Get("test")).To(Equal(123))
-			Expect(cfg.Get("testb")).To(Equal(321))
-			cfg.Set("testb", 1)
-			Expect(cfg.Get("testb")).To(Equal(1))
+			Expect(cfg.Get("test")).To(Equal("123"))
+			Expect(cfg.Get("testb")).To(Equal("321"))
+			cfg.Set("testb", "1")
+			Expect(cfg.Get("testb")).To(Equal("1"))
 		})
 	})
 })

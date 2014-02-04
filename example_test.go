@@ -16,12 +16,12 @@ func ExampleHierarchy() {
 
 func ExampleDefaults() {
 	conf := NewConfig(nil) // root config
-	conf.Defaults.Reset(map[string]interface{}{
-		"test_default":   123,
-		"test_default_b": 321,
+	conf.Defaults.Reset(map[string]string{
+		"test_default":   "123",
+		"test_default_b": "321",
 	})
 	conf.Use("second", NewConfig(nil)) // config in hierarchy as second
-	conf.Use("second").Set("test_default", 333)
+	conf.Use("second").Set("test_default", "333")
 	fmt.Println(conf.Get("test_default"), conf.Get("test_default_b"))
 	// Output: 333 321
 }
@@ -46,4 +46,13 @@ func ExampleSaveToJson() {
 	fmt.Println(jsonconf2.Get("some"))
 	os.Remove("./config.json")
 	// Output: variable
+}
+
+func ExampleConstruction() {
+	var cfg MemoryConfig
+	cfg.Set("example1", "123")
+	fmt.Println(cfg.Get("example1"))
+	cfg2 := NewConfig(&cfg)
+	fmt.Println(cfg2.All())
+	// Output: 123
 }
