@@ -13,17 +13,17 @@ Available via: [![Go Walker](http://gowalker.org/api/v1/badge)](https://gowalker
 All the config types including the root implement the Configurable interface.
 
 ```go
-/ The main Configurable interface
+// The main Configurable interface
 // Also the hierarcial configuration (Config) implements it.
 type Configurable interface {
   // Get a configuration variable from config
-  Get(string) interface{}
+  Get(string) string
   // Set a variable, nil to reset key
-  Set(string, interface{})
+  Set(string, string)
   // Reset the config data to passed data, if nothing is given set it to zero value
-  Reset(...map[string]interface{})
+  Reset(...map[string]string)
   // Return a map of all variables
-  All() map[string]interface{}
+  All() map[string]string
 }
 
 type WritebleConfig interface {
