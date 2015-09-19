@@ -1,6 +1,7 @@
 package gonfig
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,31 +12,38 @@ type JsonConfig struct {
 	Path string
 }
 
+func unmarshalJsonSegment(jsonSegment map[string]interface{}, segmentPath string, output map[string]string) {
+	if segmentPath != "" {
+		segmentPath += ":"
+	}
+
+	for k, v := range jsonSegment {
+		keyWithPath := segmentPath + k
+
+		switch v := v.(type) {
+		case map[string]interface{}:
+			unmarshalJsonSegment(v, keyWithPath, output)
+		case []interface{}:
+			var buffer bytes.Buffer
+			for _, sVal := range v {
+				buffer.WriteString(fmt.Sprintf("%v", sVal))
+			}
+			output[keyWithPath] = buffer.String()
+		default:
+			output[keyWithPath] = fmt.Sprintf("%v", v)
+		}
+	}
+}
+
 func unmarshalJson(bytes []byte) (map[string]string, error) {
 	out := make(map[string]interface{})
 	if err := json.Unmarshal(bytes, &out); err != nil {
 		return nil, err
 	}
-	var output map[string]string = make(map[string]string)
 
-	for k, v := range out {
-		switch v := v.(type) {
-		case int:
-			output[k] = fmt.Sprintf("%d", v)
-		case float64:
-			output[k] = fmt.Sprintf("%f", v)
-		case string:
-			output[k] = v
-		case bool:
-			if v {
-				output[k] = "true"
-			} else {
-				output[k] = "false"
-			}
-		default:
-			// i isn't one of the types above
-		}
-	}
+	var output map[string]string = make(map[string]string)
+	unmarshalJsonSegment(out, "", output)
+
 	return output, nil
 }
 

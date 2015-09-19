@@ -3,8 +3,15 @@
   "test_b":"abc",
   "test_number":1,
   "test_array":[1,2,3],
+  "test_bool": true,
+  "test_float": 12.34,
   "test_object": {
-    "test_a":1,
-    "test_b":"b"
+    "nested_int": 987,
+    "nested_string": "abcd"
+  },
+  "double_nested": {
+    "nested_object": {
+      "test_inner": "foo"
+    }
   }
 }
