@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io/ioutil"
 )
 
@@ -26,9 +27,9 @@ func unmarshalJsonSegment(jsonSegment map[string]interface{}, segmentPath string
 		case []interface{}:
 			var buffer bytes.Buffer
 			for _, sVal := range v {
-				buffer.WriteString(fmt.Sprintf("%v", sVal))
+				buffer.WriteString(fmt.Sprintf("%v,", sVal))
 			}
-			output[keyWithPath] = buffer.String()
+			output[keyWithPath] = strings.Trim(buffer.String(), ",")
 		default:
 			output[keyWithPath] = fmt.Sprintf("%v", v)
 		}
