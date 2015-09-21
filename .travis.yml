@@ -16,4 +16,4 @@ after_success:
   - export PATH=$PATH:$HOME/gopath/bin/
   - goveralls nBDcRxYTbtu6tjcj8fknzcZOgSkxb9VnL
 
-script: PATH=$HOME/gopath/bin:$PATH ginkgo -r  -i --randomizeAllSpecs --failOnPending --skipMeasurements --cover
+script: PATH=$HOME/gopath/bin:$PATH ginkgo -r --randomizeAllSpecs --failOnPending --skipMeasurements --cover
