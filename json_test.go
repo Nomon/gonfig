@@ -18,11 +18,32 @@ var _ = Describe("JsonConfig", func() {
 	})
 
 	Context("When the JSON config marshals properly", func() {
-		It("Should have the variables in config", func() {
+		It("Should have a string variable in config", func() {
 			Expect(cfg.Get("test")).To(Equal("123"))
+		})
+		It("Should have an int variable in config", func() {
+			Expect(cfg.Get("test_number")).To(Equal("1"))
+		})
+		It("Should have a bool variable in config", func() {
+			Expect(cfg.Get("test_bool")).To(Equal("true"))
+		})
+		It("Should have a float variable in config", func() {
+			Expect(cfg.Get("test_float")).To(Equal("12.34"))
 		})
 		It("Should not error", func() {
 			Expect(err).NotTo(HaveOccurred())
+		})
+		It("Should have the string value from a nested map", func() {
+			Expect(cfg.Get("test_object:nested_string")).To(Equal("abcd"))
+		})
+		It("Should have the string value from a deeply nested map", func() {
+			Expect(cfg.Get("double_nested:nested_object:test_inner")).To(Equal("foo"))
+		})
+		It("Should have the int value from a nested map", func() {
+			Expect(cfg.Get("test_object:nested_int")).To(Equal("987"))
+		})
+		It("Should have the values from an input array", func() {
+			Expect(cfg.Get("test_array")).To(Equal("1,2,3"))
 		})
 	})
 
