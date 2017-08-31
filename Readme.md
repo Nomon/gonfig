@@ -48,7 +48,6 @@ type Config struct {
   //Defaults is checked for fallback values
   Defaults Configurable
 }
-
 ```
 
 ### Usage & Examples
@@ -65,7 +64,7 @@ For more examples check out [example_test.go](https://github.com/Nomon/gonfig/bl
   conf.Set("always", true);
 
   // use commandline variables myapp.*, ie --myapp-rules
-  conf.Use("argv"), NewNewArgvConfig("myapp.*"))
+  conf.Use("argv", NewArgvConfig("myapp.*"))
 
   // use env variables MYAPP_*
   conf.Use("env", NewEnvConfig("MYAPP_"))
@@ -93,7 +92,6 @@ For more examples check out [example_test.go](https://github.com/Nomon/gonfig/bl
     log.Fatalln("Failed saving json config at path",jsonconf.Path,err)
   }
 }
-
 ```
 
 ### Extending
