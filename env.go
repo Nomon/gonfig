@@ -26,8 +26,8 @@ func NewEnvConfig(prefix string) ReadableConfig {
 func (self *EnvConfig) Load() (err error) {
 	env := os.Environ()
 	for _, pair := range env {
-		kv := strings.Split(pair, "=")
-		if kv != nil && len(kv) >= 2 {
+		kv := strings.SplitN(pair, "=", 2)
+		if kv != nil && len(kv) == 2 {
 			self.Set(strings.Replace(kv[0], self.Prefix, "", 1), kv[1])
 		}
 	}
