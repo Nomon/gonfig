@@ -51,6 +51,8 @@ type Gonfig struct {
 	Configurable
 	// named configurables, these are iterated if key is not found in Config
 	Configs map[string]Configurable
+
+	keys []string
 	// Defaults configurable, if key is not found in the Configurable & Configurables in Config,
 	//Defaults is checked for fallback values
 	Defaults Configurable
@@ -74,6 +76,7 @@ func NewConfig(initial Configurable, defaults ...Configurable) *Gonfig {
 	return &Gonfig{
 		initial,
 		make(map[string]Configurable),
+			make([]string, 0, 1),
 		defaults[0],
 	}
 }
@@ -116,7 +119,8 @@ func (self *Gonfig) Reset(datas ...map[string]string) {
 	if len(datas) > 0 {
 		data = datas[0]
 	}
-	for _, value := range self.Configs {
+	for _, name := range self.keys {
+		value := self.Configs[name]
 		if data != nil {
 			value.Reset(data)
 		} else {
@@ -139,11 +143,13 @@ func (self *Gonfig) Reset(datas ...map[string]string) {
 func (self *Gonfig) Use(name string, config ...Configurable) Configurable {
 	if self.Configs == nil {
 		self.Configs = make(map[string]Configurable)
+		self.keys = make([]string, 0, len(config))
 	}
 	if len(config) == 0 {
 		return self.Configs[name]
 	}
 	self.Configs[name] = config[0]
+	self.keys = append(self.keys, name)
 	LoadConfig(self.Configs[name])
 	return self.Configs[name]
 }
@@ -155,7 +161,11 @@ func (self *Gonfig) Get(key string) string {
 		return value
 	}
 	// go through all in insert order untill key is found
-	for _, config := range self.Configs {
+	for _, name := range self.keys {
+		config := self.Configs[name]
+		if config == nil {
+			break
+		}
 		if value := config.Get(key); value != "" {
 			return value
 		}
@@ -182,7 +192,8 @@ func SaveConfig(config Configurable) error {
 
 // Saves all mounted configurations in the hierarchy that implement the WritableConfig interface
 func (self *Gonfig) Save() error {
-	for _, config := range self.Configs {
+	for _, name := range self.keys {
+		config := self.Configs[name]
 		if err := SaveConfig(config); err != nil {
 			return err
 		}

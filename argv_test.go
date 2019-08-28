@@ -14,6 +14,7 @@ var _ = Describe("ArgvConfig", func() {
 	BeforeEach(func() {
 		cfg = NewArgvConfig("test")
 		err = cfg.Load()
+		Expect(err == nil)
 	})
 	It("Should load variables from commandline", func() {
 		Expect(len(cfg.All()) >= 0).To(BeTrue())
