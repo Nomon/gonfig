@@ -15,6 +15,7 @@ var _ = Describe("EnvConfig", func() {
 	BeforeEach(func() {
 		cfg = NewEnvConfig("")
 		err = cfg.Load()
+		Expect(err == nil)
 	})
 	It("Should load variables from environment", func() {
 		Expect(len(cfg.All()) > 0).To(BeTrue())
